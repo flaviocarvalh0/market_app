@@ -5,7 +5,7 @@ import 'package:market_app/models/product.dart';
 class ProductListProvider with ChangeNotifier {
   List<Product> _items = dummyProducts;
 
-  List<Product> get itemm => [..._items];
+  List<Product> get item => [..._items];
 
   void addItem(Product product) {
     _items.add(product);
