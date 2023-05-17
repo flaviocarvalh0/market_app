@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:market_app/components/sticker_cart.dart';
+import 'package:market_app/providers/cart_provider.dart';
+import 'package:market_app/utils/app_routes.dart';
+import 'package:provider/provider.dart';
 import '../components/product_grid.dart';
 
 enum FavoritOptions { favorite, all }
@@ -16,9 +20,7 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text('Minha Loja'),
-        ),
+        title: const Text('Minha Loja'),
         actions: [
           PopupMenuButton(
             itemBuilder: (_) => [
@@ -41,6 +43,20 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
               });
             },
           ),
+          Consumer<CartProvider>(
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(AppRoutes.cartPage);
+              },
+              icon: const Icon(
+                Icons.shopping_cart,
+              ),
+            ),
+            builder: (context, cart, child) => StickerCart(
+              value: cart.itemsCount.toString(),
+              child: child!,
+            ),
+          )
         ],
       ),
       body: ProductGrid(_showFavorities),
