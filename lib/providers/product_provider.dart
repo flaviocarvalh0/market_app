@@ -24,14 +24,14 @@ class ProductProvider with ChangeNotifier {
     if (response.body == 'null') return;
     Map<String, dynamic> data = jsonDecode(response.body);
     data.forEach((productId, productData) {
-      String priceConvert = productData['price'].toString();
-      double priceConverted = double.tryParse(priceConvert) ?? 0.0;
+      //String priceConvert = productData['price'].toString();
+      //double priceConverted = double.tryParse(priceConvert) ?? 0.0;
       _items.add(
         Product(
           id: productId,
           name: productData['name'],
           description: productData['description'],
-          price: priceConverted,
+          price: productData['price'],
           imageUrl: productData['imageUrl'],
           isFavorite: productData['isFavorite'],
         ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:market_app/pages/auth/auth_page.dart';
 import 'package:market_app/pages/cart/cart_page.dart';
 import 'package:market_app/pages/order/orders_page.dart';
 import 'package:market_app/pages/product/product_form_page.dart';
+import 'package:market_app/providers/auth_provider.dart';
 import 'package:market_app/providers/cart_provider.dart';
 import 'package:market_app/providers/order_provider.dart';
 import 'package:market_app/providers/product_provider.dart';
@@ -29,6 +31,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => OrderProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(),
+        ),
       ],
       child: MaterialApp(
         localizationsDelegates: const [
@@ -49,6 +54,7 @@ class MyApp extends StatelessWidget {
         ),
         //home: const ProductsOverviewPage(),
         routes: {
+          AppRoutes.auth: (context) => const AuthPage(),
           AppRoutes.home: (context) => const ProductsOverviewPage(),
           AppRoutes.productDetail: (context) => const ProductDetailPage(),
           AppRoutes.cartPage: (context) => const CartPage(),
