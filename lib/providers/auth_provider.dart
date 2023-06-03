@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:market_app/excepctions/auth_exception.dart';
 
 class AuthProvider with ChangeNotifier {
   // ignore: constant_identifier_names
@@ -23,14 +24,20 @@ class AuthProvider with ChangeNotifier {
       ),
     );
 
-    print(jsonDecode(response.body));
+    final body = jsonDecode(response.body);
+
+    if (body['error'] != null) {
+      throw AuthException(key: body['error']['message']);
+    }
+
+    print(body);
   }
 
   Future<void> singUp(String email, String password) async {
-    _authenticate(email, password, 'signUp');
+    return _authenticate(email, password, 'signUp');
   }
 
   Future<void> singIn(String email, String password) async {
-    _authenticate(email, password, 'signInWithPassword');
+    return _authenticate(email, password, 'signInWithPassword');
   }
 }

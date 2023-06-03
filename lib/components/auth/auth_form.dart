@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:market_app/excepctions/auth_exception.dart';
 import 'package:market_app/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -13,8 +14,9 @@ class AuthForm extends StatefulWidget {
 
 class _AuthFormState extends State<AuthForm> {
   AuthMode _authMode = AuthMode.login;
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = true;
+  bool _showPassword = true;
   final _formKey = GlobalKey<FormState>();
   final Map<String, dynamic> _authData = {
     'email': '',
@@ -33,6 +35,25 @@ class _AuthFormState extends State<AuthForm> {
     });
   }
 
+  void _showDialog(String msg) {
+    showDialog(
+      context: context,
+      builder: ((context) => AlertDialog(
+            title: const Text('Ocorreu um erro'),
+            content: Text(
+              msg,
+              style: const TextStyle(color: Colors.black),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
+          )),
+    );
+  }
+
   Future<void> _submitForm() async {
     setState(() => _isLoading = false);
     final isValid = _formKey.currentState?.validate() ?? false;
@@ -44,16 +65,22 @@ class _AuthFormState extends State<AuthForm> {
     _formKey.currentState?.save();
     AuthProvider auth = Provider.of(context, listen: false);
 
-    if (_isLogin()) {
-      await auth.singIn(
-        _authData['email']!,
-        _authData['password']!,
-      );
-    } else {
-      await auth.singUp(
-        _authData['email']!,
-        _authData['password']!,
-      );
+    try {
+      if (_isLogin()) {
+        await auth.singIn(
+          _authData['email']!,
+          _authData['password']!,
+        );
+      } else {
+        await auth.singUp(
+          _authData['email']!,
+          _authData['password']!,
+        );
+      }
+    } on AuthException catch (error) {
+      _showDialog(error.toString());
+    } catch (_) {
+      _showDialog('Ocorreu um erro inerperado, contate o suporte.');
     }
 
     setState(() => _isLoading = true);
@@ -102,8 +129,18 @@ class _AuthFormState extends State<AuthForm> {
                   }
                   return null;
                 },
-                decoration: const InputDecoration(labelText: 'Senha'),
-                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Senha',
+                  suffixIcon: IconButton(
+                    onPressed: () => setState(() {
+                      _showPassword = !_showPassword;
+                    }),
+                    icon: Icon(_showPassword
+                        ? Icons.remove_red_eye
+                        : Icons.remove_red_eye_outlined),
+                  ),
+                ),
+                obscureText: _showPassword,
               ),
               if (_isSingUp())
                 TextFormField(
@@ -117,14 +154,15 @@ class _AuthFormState extends State<AuthForm> {
                           }
                           return null;
                         },
-                  decoration:
-                      const InputDecoration(labelText: 'Confirmar senha'),
+                  decoration: const InputDecoration(
+                    labelText: 'Confirmar senha',
+                  ),
                   obscureText: true,
                 ),
               const SizedBox(
                 height: 20,
               ),
-              if (_isLoading = false)
+              if (_isLoading == false)
                 CircularProgressIndicator()
               else
                 ElevatedButton(
