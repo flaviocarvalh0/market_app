@@ -1,39 +1,55 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:market_app/excepctions/http_exception.dart';
 import 'package:market_app/models/product.dart';
 import 'package:market_app/utils/constantes.dart';
 
 class ProductProvider with ChangeNotifier {
-  final List<Product> _items = [];
+  final String _token;
+  final String userId;
+
+  List<Product> _items = [];
 
   List<Product> get items => [..._items];
   List<Product> get favoritieItems =>
       _items.where((element) => element.isFavorite).toList();
 
+  ProductProvider(this._token, this._items, this.userId);
   int get productCount => _items.length;
 
   Future<void> loadProducts() async {
     _items.clear();
     final response = await http.get(
-      Uri.parse('${Constantes.PRODUCT_BASE_URL}.json'),
+      Uri.parse('${Constantes.PRODUCT_BASE_URL}.json?auth=$_token'),
     );
     if (response.body == 'null') return;
+
+    final favResponse = await http.get(
+      Uri.parse('${Constantes.FAVORITES_USER_URL}/$userId.json?auth=$_token'),
+    );
+
+    Map<String, dynamic> favData =
+        favResponse.body == 'null' ? {} : jsonDecode(favResponse.body);
+
     Map<String, dynamic> data = jsonDecode(response.body);
     data.forEach((productId, productData) {
-      //String priceConvert = productData['price'].toString();
-      //double priceConverted = double.tryParse(priceConvert) ?? 0.0;
+      final isFavorite = favData[productId] ?? false;
+
+      String priceConvert = productData['price'].toString();
+      double priceConverted = double.tryParse(priceConvert) ?? 0.0;
       _items.add(
         Product(
           id: productId,
           name: productData['name'],
           description: productData['description'],
-          price: productData['price'],
+          price: priceConverted,
           imageUrl: productData['imageUrl'],
-          isFavorite: productData['isFavorite'],
+          isFavorite: isFavorite,
         ),
       );
     });
@@ -42,14 +58,13 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> addItem(Product product) async {
     final response = await http.post(
-      Uri.parse('${Constantes.PRODUCT_BASE_URL}.json'),
+      Uri.parse('${Constantes.PRODUCT_BASE_URL}.json?auth=$_token'),
       body: jsonEncode(
         {
           "name": product.name,
           "description": product.description,
           "price": product.price,
           "imageUrl": product.imageUrl,
-          "isFavorite": product.isFavorite,
         },
       ),
     );
@@ -60,7 +75,6 @@ class ProductProvider with ChangeNotifier {
       description: product.description,
       price: product.price,
       imageUrl: product.imageUrl,
-      isFavorite: product.isFavorite,
     ));
     notifyListeners();
   }
@@ -88,7 +102,8 @@ class ProductProvider with ChangeNotifier {
 
     if (index >= 0) {
       await http.patch(
-        Uri.parse('${Constantes.PRODUCT_BASE_URL}/${product.id}.json'),
+        Uri.parse(
+            '${Constantes.PRODUCT_BASE_URL}/${product.id}.json?auth=$_token'),
         body: jsonEncode(
           {
             "name": product.name,
@@ -114,7 +129,8 @@ class ProductProvider with ChangeNotifier {
       notifyListeners();
 
       final response = await http.delete(
-        Uri.parse('${Constantes.PRODUCT_BASE_URL}/${product.id}.json'),
+        Uri.parse(
+            '${Constantes.PRODUCT_BASE_URL}/${product.id}.json?auth=$_token'),
       );
 
       if (response.statusCode >= 400) {
@@ -136,12 +152,11 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> toggleFavorite(Product product) async {
     product.toggleFavorite();
-    final response = await http.patch(
-      Uri.parse('${Constantes.PRODUCT_BASE_URL}/${product.id}.json'),
+    final response = await http.put(
+      Uri.parse(
+          '${Constantes.FAVORITES_USER_URL}/$userId/${product.id}.json?auth=$_token'),
       body: jsonEncode(
-        {
-          'isFavorite': product.isFavorite,
-        },
+        product.isFavorite,
       ),
     );
 

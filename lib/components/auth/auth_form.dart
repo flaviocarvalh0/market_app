@@ -55,7 +55,6 @@ class _AuthFormState extends State<AuthForm> {
   }
 
   Future<void> _submitForm() async {
-    setState(() => _isLoading = false);
     final isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) {
@@ -65,6 +64,7 @@ class _AuthFormState extends State<AuthForm> {
     _formKey.currentState?.save();
     AuthProvider auth = Provider.of(context, listen: false);
 
+    setState(() => _isLoading = false);
     try {
       if (_isLogin()) {
         await auth.singIn(
@@ -163,7 +163,7 @@ class _AuthFormState extends State<AuthForm> {
                 height: 20,
               ),
               if (_isLoading == false)
-                CircularProgressIndicator()
+                const CircularProgressIndicator()
               else
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(

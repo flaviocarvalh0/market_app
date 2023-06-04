@@ -19,7 +19,7 @@ class DrawerWidget extends StatelessWidget {
             title: const Text('Produtos'),
             onTap: () {
               Navigator.of(context).pushReplacementNamed(
-                AppRoutes.home,
+                AppRoutes.authHomeOrLogin,
               );
             },
           ),

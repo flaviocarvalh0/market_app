@@ -1,30 +1,38 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:market_app/models/cart_item.dart';
 import 'package:market_app/models/order.dart';
 import 'package:market_app/providers/cart_provider.dart';
 import 'package:market_app/utils/constantes.dart';
 
 class OrderProvider with ChangeNotifier {
-  final List<Order> _items = [];
+  final String _token;
+  List<Order> _items = [];
+  OrderProvider(
+    this._token,
+    this._items,
+  );
 
   List<Order> get items => [..._items];
 
   int get itemsCount => _items.length;
 
   Future<void> loadOrders() async {
-    _items.clear();
+    List<Order> items = [];
 
     final response = await http.get(
-      Uri.parse('${Constantes.ORDER_BASE_URL}.json'),
+      Uri.parse('${Constantes.ORDER_BASE_URL}.json?auth=$_token'),
     );
     if (response.body == 'null') return;
     Map<String, dynamic> data = jsonDecode(response.body);
     data.forEach((orderId, orderData) {
       String totalConvert = orderData['total'].toString();
       double totalConverted = double.tryParse(totalConvert) ?? 0.0;
-      _items.add(
+      items.add(
         Order(
           id: orderId,
           date: DateTime.parse(orderData['date']),
@@ -43,6 +51,8 @@ class OrderProvider with ChangeNotifier {
         ),
       );
     });
+
+    _items = items.reversed.toList();
     notifyListeners();
   }
 
@@ -50,7 +60,7 @@ class OrderProvider with ChangeNotifier {
     DateTime date = DateTime.now();
 
     final response = await http.post(
-      Uri.parse('${Constantes.ORDER_BASE_URL}.json'),
+      Uri.parse('${Constantes.ORDER_BASE_URL}.json?auth=$_token'),
       body: json.encode(
         {
           'total': cart.totalAmount,
