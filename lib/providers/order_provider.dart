@@ -11,10 +11,12 @@ import 'package:market_app/utils/constantes.dart';
 
 class OrderProvider with ChangeNotifier {
   final String _token;
+  final String _userId;
   List<Order> _items = [];
   OrderProvider(
     this._token,
     this._items,
+    this._userId,
   );
 
   List<Order> get items => [..._items];
@@ -25,7 +27,7 @@ class OrderProvider with ChangeNotifier {
     List<Order> items = [];
 
     final response = await http.get(
-      Uri.parse('${Constantes.ORDER_BASE_URL}.json?auth=$_token'),
+      Uri.parse('${Constantes.ORDER_BASE_URL}/$_userId.json?auth=$_token'),
     );
     if (response.body == 'null') return;
     Map<String, dynamic> data = jsonDecode(response.body);
@@ -60,7 +62,7 @@ class OrderProvider with ChangeNotifier {
     DateTime date = DateTime.now();
 
     final response = await http.post(
-      Uri.parse('${Constantes.ORDER_BASE_URL}.json?auth=$_token'),
+      Uri.parse('${Constantes.ORDER_BASE_URL}/$_userId.json?auth=$_token'),
       body: json.encode(
         {
           'total': cart.totalAmount,

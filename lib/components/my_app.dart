@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:market_app/pages/auth/auth_home_or_login_page.dart';
-import 'package:market_app/pages/auth/auth_page.dart';
 import 'package:market_app/pages/cart/cart_page.dart';
 import 'package:market_app/pages/order/orders_page.dart';
 import 'package:market_app/pages/product/product_form_page.dart';
@@ -11,7 +10,7 @@ import 'package:market_app/providers/product_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../pages/product/product_detail_page.dart';
-import '../pages/product/products_overview_page.dart';
+
 import '../pages/product/products_page.dart';
 import '../utils/app_routes.dart';
 import 'package:provider/provider.dart';
@@ -37,9 +36,13 @@ class MyApp extends StatelessWidget {
           },
         ),
         ChangeNotifierProxyProvider<AuthProvider, OrderProvider>(
-          create: (_) => OrderProvider('', []),
+          create: (_) => OrderProvider('', [], ''),
           update: (context, auth, previous) {
-            return OrderProvider(auth.token ?? '', previous?.items ?? []);
+            return OrderProvider(
+              auth.token ?? '',
+              previous?.items ?? [],
+              auth.userId ?? '',
+            );
           },
         ),
         ChangeNotifierProvider(

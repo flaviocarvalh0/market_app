@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:market_app/providers/auth_provider.dart';
 import 'package:market_app/utils/app_routes.dart';
+import 'package:provider/provider.dart';
 
 class DrawerWidget extends StatelessWidget {
   const DrawerWidget({Key? key}) : super(key: key);
@@ -40,6 +42,20 @@ class DrawerWidget extends StatelessWidget {
             onTap: () {
               Navigator.of(context).pushReplacementNamed(
                 AppRoutes.products,
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.exit_to_app),
+            title: const Text('Sair'),
+            onTap: () {
+              Provider.of<AuthProvider>(
+                context,
+                listen: false,
+              ).logout();
+              Navigator.of(context).pushReplacementNamed(
+                AppRoutes.authHomeOrLogin,
               );
             },
           ),
